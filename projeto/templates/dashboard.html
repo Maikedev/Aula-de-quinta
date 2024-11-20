@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Saúde Pública</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard de Saúde Pública</h1>
+        <div>
+            <h2>Distribuição por Gênero</h2>
+            {{ genero_plot | safe }}
+        </div>
+        <div>
+            <h2>Distribuição de Idades</h2>
+            {{ idade_plot | safe }}
+        </div>
+        <div>
+            <h2>Distribuição por Região</h2>
+            {{ regiao_plot | safe }}
+        </div>
+        <div>
+            <h2>Sintomas Mais Comuns</h2>
+            {{ sintomas_plot | safe }}
+        </div>
+        <div>
+            <button><a href="http://127.0.0.1:5000">Formulário</a></button>
+        </div>
+        <div class="chatbot-container">
+            <div class="chatbot-header">Chat</div>
+            <div class="chatbot-messages" id="chatbot-messages"></div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbot-input" placeholder="Faça sua pergunta...">
+                <button onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
+<script>
+    const messagesContainer = document.getElementById('chatbot-messages');
+
+    function sendMessage() {
+        const input = document.getElementById('chatbot-input');
+        const question = input.value.trim();
+        if (question === '') return;
+
+        // Adiciona a pergunta do usuário
+        addMessage(question, 'user');
+
+        // Envia a pergunta ao servidor
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pergunta: question })
+        })
+        .then(response => response.json())
+        .then(data => {
+            addMessage(data.resposta, 'bot');
+        })
+        .catch(() => {
+            addMessage('Desculpe, algo deu errado. Tente novamente.', 'bot');
+        });
+
+        input.value = '';
+    }
+
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender);
+        messageDiv.textContent = text;
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+</script>
+</body>
+
+
+</html>
